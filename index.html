@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Test AV Directionnel - Version Corrigée</title>
+    <title>Test AV Directionnel - Version Modifiée</title>
     <style>
         body {
             margin: 0;
@@ -284,16 +284,18 @@
                 // 2. DÉTECTION DE DIRECTION
                 lastMovementDirection = detectDirection(face);
 
-                // 3. GESTION DES ÉTATS (seuil à 150°/s)
+                // 3. GESTION DES ÉTATS - MODIFICATION PRINCIPALE ICI
                 if (currentTestState === TEST_STATES.IDLE &&
                     now - lastFlashTime > COOLDOWN_DURATION &&
                     speedDegPerSec > MIN_SPEED_TRIGGER) {
 
-                    // Vérifier si la direction correspond à la direction cible
-                    if ((currentDirectionIndex === 0 && lastMovementDirection === 'right') ||
-                        (currentDirectionIndex === 1 && lastMovementDirection === 'left') ||
-                        (currentDirectionIndex === 2 && lastMovementDirection === 'down') ||
-                        (currentDirectionIndex === 3 && lastMovementDirection === 'up')) {
+                    // MODIFICATION: Vérifier que la direction du mouvement correspond à la direction cible
+                    const targetDirection = DIRECTIONS[currentDirectionIndex];
+
+                    if ((targetDirection === 'right' && lastMovementDirection === 'right') ||
+                        (targetDirection === 'left' && lastMovementDirection === 'left') ||
+                        (targetDirection === 'down' && lastMovementDirection === 'down') ||
+                        (targetDirection === 'up' && lastMovementDirection === 'up')) {
 
                         currentTestState = TEST_STATES.WAITING_VALIDATION;
                         currentLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
