@@ -357,38 +357,45 @@
             scoreTopPanel.innerHTML = `${directionNames[directionName]} | Taille: ${letterSizePx} px`;
         }
 
-        // --- MACHINE D'ÉTAT MODIFIÉE ---
+        // --- MACHINE D'ÉTAT SIMPLIFIÉE ---
         function handleState(currentSpeed, now) {
-            const minSpeedTrigger = 150;
-            const flashDuration = 60;
-            const cooldownDuration = 1000;
+            const minSpeedTrigger = 100;  // Réduit de 150 à 100 pour plus de sensibilité
+            const flashDuration = 2000;    // Plus long pour laisser le temps de réagir
+            const cooldownDuration = 500;  // Plus court
 
-            if (state === 'IDLE') {
-                if (currentTestState !== TEST_STATES.IDLE &&
-                    currentSpeed > minSpeedTrigger &&
-                    (now - lastFlashTime > cooldownDuration)) {
+            if (state === 'IDLE' && currentTestState !== TEST_STATES.IDLE) {
+                // Vérifier si la vitesse est suffisante
+                if (currentSpeed > minSpeedTrigger && (now - lastFlashTime > cooldownDuration)) {
 
-                    const detectedDirection = lastMovementDirection;
+                    // Vérifier si on a détecté une direction
+                    if (lastMovementDirection) {
+                        // Vérifier si la direction correspond à la direction cible
+                        let directionMatch = false;
 
-                    if ((currentTestState === TEST_STATES.RIGHT && detectedDirection === 'right') ||
-                        (currentTestState === TEST_STATES.LEFT && detectedDirection === 'left') ||
-                        (currentTestState === TEST_STATES.UP && detectedDirection === 'up') ||
-                        (currentTestState === TEST_STATES.DOWN && detectedDirection === 'down')) {
+                        if (currentTestState === TEST_STATES.RIGHT && lastMovementDirection === 'right') {
+                            directionMatch = true;
+                        } else if (currentTestState === TEST_STATES.LEFT && lastMovementDirection === 'left') {
+                            directionMatch = true;
+                        } else if (currentTestState === TEST_STATES.UP && lastMovementDirection === 'up') {
+                            directionMatch = true;
+                        } else if (currentTestState === TEST_STATES.DOWN && lastMovementDirection === 'down') {
+                            directionMatch = true;
+                        }
 
-                        state = 'WAITING_VALIDATION';
-                        lastFlashTime = now;
-                        currentDisplayedLetter = letters[Math.floor(Math.random() * letters.length)];
-                        letterEl.innerText = currentDisplayedLetter;
-                        letterEl.style.opacity = '1';
+                        if (directionMatch) {
+                            state = 'WAITING_VALIDATION';
+                            lastFlashTime = now;
+                            currentDisplayedLetter = letters[Math.floor(Math.random() * letters.length)];
+                            letterEl.innerText = currentDisplayedLetter;
+                            letterEl.style.opacity = '1';
 
-                        flashTimeout = setTimeout(() => {
-                            if (state === 'WAITING_VALIDATION') {
-                                letterEl.style.opacity = '0';
-                                if (currentTestState !== TEST_STATES.IDLE) {
+                            flashTimeout = setTimeout(() => {
+                                if (state === 'WAITING_VALIDATION') {
+                                    letterEl.style.opacity = '0';
                                     handleLetterFailure();
                                 }
-                            }
-                        }, flashDuration);
+                            }, flashDuration);
+                        }
                     }
                 }
             }
@@ -554,7 +561,7 @@
                 lastHeadPos = { x: nose[0], y: nose[1] };
                 lastTime = now;
 
-                // 3. DÉTECTION DE LA DIRECTION
+                // 3. DÉTECTION DE LA DIRECTION (simplifiée)
                 detectDirection(nose, lastHeadPos);
 
                 handleState(speed, now);
@@ -568,13 +575,13 @@
             requestAnimationFrame(loop);
         }
 
-        // --- DÉTECTION DE DIRECTION ---
+        // --- DÉTECTION DE DIRECTION (simplifiée) ---
         function detectDirection(currentPos, lastPos) {
             if (!lastPos) return;
 
             const dx = currentPos.x - lastPos.x;
             const dy = currentPos.y - lastPos.y;
-            const threshold = 10;
+            const threshold = 5;  // Réduit de 10 à 5 pour plus de sensibilité
 
             if (Math.abs(dx) > threshold || Math.abs(dy) > threshold) {
                 if (Math.abs(dx) > Math.abs(dy)) {
@@ -591,7 +598,7 @@
             document.getElementById('statusDist').innerText = `Dist: ~${Math.round(distance)} cm`;
             document.getElementById('statusSize').innerText = `Taille: ${letterSizePx} px`;
 
-            let pct = Math.min(100, (speed / 250) * 100);
+            let pct = Math.min(100, (speed / 200) * 100);
             document.getElementById('speedBar').style.width = `${pct}%`;
             const bar = document.getElementById('speedBar');
             if(speed > 150) bar.style.background = '#f00';
