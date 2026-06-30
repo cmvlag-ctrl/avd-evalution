@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Test AV Directionnel - Version Corrigée</title>
+    <title>Test AV Directionnel - Version Complète</title>
     <style>
         body {
             margin: 0;
@@ -84,44 +84,120 @@
             background: #555;
             color: white;
         }
+        button:hover {
+            opacity: 0.9;
+        }
         #startOverlay {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #000;
-            z-index: 100;
+            background: rgba(0,0,0,0.9);
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-            text-align: center;
-            padding: 20px;
+            align-items: center;
+            z-index: 100;
         }
-        #calibPanel {
-            display: none;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #444;
-            text-align: center;
+        #startMessage {
+            font-size: 24px;
+            margin-bottom: 20px;
+            opacity: 0;
+            transition: opacity 0.5s;
         }
-        .calib-bar-container {
-            height: 20px;
-            border: 1px dashed #666;
-            margin: 10px auto;
+        #keyboard {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            z-index: 20;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+        .key {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            min-width: 40px;
+            text-align: center;
+        }
+        .key.validated {
+            background: #0f0;
+        }
+        .key.invalid {
+            background: #f55;
+        }
+        #leftControls, #rightControls {
+            position: absolute;
+            z-index: 20;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        #leftControls {
+            left: 10px;
+            bottom: 10px;
+        }
+        #rightControls {
+            right: 10px;
+            bottom: 10px;
+        }
+        #finalStatsOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            width: 12mm;
+            z-index: 100;
         }
-        .calib-bar {
-            height: 100%;
-            background: red;
-            width: 10mm;
-            transform-origin: center;
+        .final-stat {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+        #restartBtn {
+            background: #4ecdc4;
+            padding: 15px 30px;
+            font-size: 20px;
+            margin-top: 20px;
+        }
+        #statusInit {
+            font-size: 16px;
+            margin-top: 10px;
+            color: #0ff;
+        }
+        #errorMsg {
+            color: #f55;
+            font-size: 16px;
+            text-align: center;
+            margin-top: 20px;
         }
         #letterSizeControl {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+        #scoreTopPanel {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -129,308 +205,106 @@
             background: rgba(0,0,0,0.8);
             padding: 10px;
             border-radius: 8px;
-            width: 120px;
-            text-align: center;
-        }
-        #letterSizeLabel {
-            font-size: 11px;
-            margin-bottom: 5px;
-        }
-        #letterSizeValue {
-            font-size: 16px;
-            font-weight: bold;
-            margin: 5px 0;
-            color: #4ecdc4;
-        }
-        .size-control-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-        }
-        .size-btn {
-            width: 30px;
-            height: 30px;
-            font-size: 18px;
-            font-weight: bold;
-            background: #555;
-            padding: 0;
-            line-height: 28px;
-        }
-        .size-btn:hover {
-            background: #777;
-        }
-        #letterSizeInput {
-            width: 60px;
-            text-align: center;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
-            padding: 5px;
-            font-family: monospace;
-        }
-        #keyboard {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 30;
-            background: rgba(0,0,0,0.8);
-            padding: 12px;
-            border-radius: 8px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 6px;
-            width: 90%;
-            max-width: 550px;
-        }
-        .key {
-            width: 42px;
-            height: 42px;
-            background: #333;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        .key:hover {
-            background: #555;
-            transform: scale(1.1);
-        }
-        .key.validated {
-            background: #28a745;
-        }
-        .key.invalid {
-            background: #dc3545;
-        }
-        #startMessage {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 48px;
-            font-weight: bold;
-            color: #4ecdc4;
-            opacity: 0;
-            z-index: 20;
-            text-shadow: 0 0 10px #4ecdc4;
-            transition: opacity 0.3s;
-        }
-        #scoreTopPanel {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 25;
-            background: rgba(0,0,0,0.8);
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-family: monospace;
             font-size: 14px;
-            text-align: center;
-            white-space: nowrap;
-        }
-        #leftControls {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 30;
-        }
-        #rightControls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 30;
-        }
-        .control-btn {
-            width: 100px;
-            padding: 8px;
-            font-size: 12px;
-            font-weight: bold;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-bottom: 5px;
-        }
-        .calib-btn {
-            background: #555 !important;
-            color: white !important;
-        }
-        .finish-btn {
-            background: #ffc107 !important;
-            color: #000 !important;
-        }
-        .finish-btn:hover {
-            background: #ffd54f !important;
-        }
-        #finalStatsOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 200;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
-        }
-        .final-stat-box {
-            background: rgba(0,0,0,0.8);
-            padding: 20px;
-            border-radius: 10px;
-            margin: 10px;
-            width: 90%;
-            max-width: 400px;
-        }
-        .final-stat-title {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: #4ecdc4;
-        }
-        .final-stat-item {
-            font-size: 16px;
-            margin: 8px 0;
-            color: white;
-        }
-        .final-stat-value {
-            font-weight: bold;
-            color: #28a745;
-        }
-        #restartButton {
-            background: #28a745;
-            margin-top: 20px;
         }
     </style>
 </head>
 <body>
+    <video id="video" autoplay muted playsinline></video>
+    <div id="letterDisplay"></div>
+    <div id="ui">
+        <div class="stat">Direction: --</div>
+        <div class="stat">Score: 0%</div>
+        <div class="stat">Vitesse: 0°/s</div>
+        <div class="stat">Distance: -- cm</div>
+        <div class="stat error" id="errorMsg"></div>
+        <div class="speed-gauge">
+            <div class="speed-bar" id="speedBar"></div>
+        </div>
+        <button id="startBtn">DÉMARRER</button>
+        <button id="calibBtn" class="secondary">CALIBRER</button>
+        <div id="calibPanel" style="display:none; margin-top:10px;">
+            <input type="range" id="calibSlider" min="30" max="120" value="60">
+            <div>Distance: <span id="calibValue">60</span> cm</div>
+            <button id="saveCalibBtn" class="secondary">Sauvegarder</button>
+        </div>
+        <div id="statusInit"></div>
+    </div>
+    <div id="scoreTopPanel">Direction: -- | Score: 0% | Min: -- px</div>
+    <div id="letterSizeControl">
+        <button onclick="adjustLetterSize(-5)">↓</button>
+        <span>Taille lettre: <span id="letterSizeValue">80</span> px</span>
+        <button onclick="adjustLetterSize(5)">↑</button>
+    </div>
+    <div id="keyboard">
+        <div class="key" onclick="validateLetter('D')">D</div>
+        <div class="key" onclick="validateLetter('F')">F</div>
+        <div class="key" onclick="validateLetter('P')">P</div>
+        <div class="key" onclick="validateLetter('V')">V</div>
+        <div class="key" onclick="validateLetter('A')">A</div>
+        <div class="key" onclick="validateLetter('N')">N</div>
+        <div class="key" onclick="validateLetter('L')">L</div>
+        <div class="key" onclick="validateLetter('C')">C</div>
+        <div class="key" onclick="validateLetter('O')">O</div>
+        <div class="key" onclick="validateLetter('E')">E</div>
+        <div class="key" onclick="validateLetter('R')">R</div>
+        <div class="key" onclick="validateLetter('U')">U</div>
+        <div class="key" onclick="validateLetter('S')">S</div>
+        <div class="key" onclick="validateLetter('Z')">Z</div>
+        <div class="key" onclick="validateLetter('H')">H</div>
+    </div>
+    <div id="leftControls">
+        <button onclick="toggleCalib()">Calibrer</button>
+    </div>
+    <div id="rightControls">
+        <button onclick="restartTest()">Recommencer</button>
+    </div>
     <div id="startOverlay">
-        <h1>Test Acuité (Pro)</h1>
-        <p>Détection de vitesse optimisée.</p>
-        <button onclick="startApp()">DÉMARRER</button>
-        <p id="errorMsg" class="error"></p>
+        <div id="startMessage">Cliquez sur DÉMARRER pour commencer</div>
     </div>
-    <video id="video" playsinline autoplay muted></video>
-    <div id="letterDisplay">A</div>
-    <div id="startMessage">Début</div>
-
-    <div id="ui" style="display:none;">
-        <div class="stat" id="statusInit">Initialisation...</div>
-        <div class="stat" id="statusSpeed">Vitesse: 0</div>
-        <div class="speed-gauge"><div class="speed-bar" id="speedBar"></div></div>
-
-        <div id="scoreTopPanel">Direction: Droite | Score: --% | Min: -- px</div>
-
-        <div class="stat" id="statusDist" style="margin-top:5px;">Distance: -- cm</div>
-        <div class="stat" id="statusSize">Taille: -- px</div>
-
-        <hr style="border-color:#333; margin: 5px 0;">
-
-        <div id="calibPanel">
-            <p style="font-size:11px; margin:0; color:#ddd;">Ajustez la barre rouge à <b>1 cm</b> avec une règle.</p>
-            <div class="calib-bar-container">
-                <div class="calib-bar" id="calibBar"></div>
-            </div>
-            <input type="range" id="calibSlider" min="0.5" max="2.0" step="0.05" value="1.0" oninput="updateCalib()" style="width:100%;">
-            <button onclick="saveCalib()" style="background:#28a745; margin-top:5px;">Sauvegarder</button>
-        </div>
-    </div>
-
-    <div id="letterSizeControl" style="display:none;">
-        <div id="letterSizeLabel">Taille lettre (px)</div>
-        <div id="letterSizeValue">80</div>
-        <div class="size-control-buttons">
-            <button class="size-btn secondary" onclick="adjustLetterSize(-10)">-</button>
-            <input type="number" id="letterSizeInput" min="5" max="300" value="80" onchange="updateLetterSizeFromInput()">
-            <button class="size-btn secondary" onclick="adjustLetterSize(10)">+</button>
-        </div>
-    </div>
-
-    <div id="keyboard" style="display:none;">
-        <!-- Clavier généré par JavaScript -->
-    </div>
-
-    <!-- Boutons FIN et Calibrer en position fixe -->
-    <div id="leftControls" style="display:none;">
-        <button class="control-btn calib-btn" onclick="toggleCalib()">📏 Calibrer</button>
-    </div>
-    <div id="rightControls" style="display:none;">
-        <button class="control-btn finish-btn" onclick="showFinalStats()">FIN</button>
-    </div>
-
     <div id="finalStatsOverlay">
-        <div class="final-stat-box">
-            <div class="final-stat-title">Statistiques Globales</div>
-            <div class="final-stat-item">Lettres affichées: <span class="final-stat-value" id="totalLetters">0</span></div>
-            <div class="final-stat-item">Bonnes réponses: <span class="final-stat-value" id="correctLetters">0</span></div>
-            <div class="final-stat-item">Taux de réussite: <span class="final-stat-value" id="globalSuccessRate">0%</span></div>
-        </div>
-        <div class="final-stat-box">
-            <div class="final-stat-title">Direction: Droite</div>
-            <div class="final-stat-item">Mouvements: <span class="final-stat-value" id="rightCount">0</span></div>
-            <div class="final-stat-item">Taux de réussite: <span class="final-stat-value" id="rightSuccessRate">--%</span></div>
-            <div class="final-stat-item">Plus petite lettre réussie: <span class="final-stat-value" id="rightMinSize">-- px</span></div>
-        </div>
-        <div class="final-stat-box">
-            <div class="final-stat-title">Direction: Gauche</div>
-            <div class="final-stat-item">Mouvements: <span class="final-stat-value" id="leftCount">0</span></div>
-            <div class="final-stat-item">Taux de réussite: <span class="final-stat-value" id="leftSuccessRate">--%</span></div>
-            <div class="final-stat-value" id="leftMinSize">-- px</div>
-        </div>
-        <div class="final-stat-box">
-            <div class="final-stat-title">Direction: Haut</div>
-            <div class="final-stat-item">Mouvements: <span class="final-stat-value" id="upCount">0</span></div>
-            <div class="final-stat-item">Taux de réussite: <span class="final-stat-value" id="upSuccessRate">--%</span></div>
-            <div class="final-stat-value" id="upMinSize">-- px</div>
-        </div>
-        <div class="final-stat-box">
-            <div class="final-stat-title">Direction: Bas</div>
-            <div class="final-stat-item">Mouvements: <span class="final-stat-value" id="downCount">0</span></div>
-            <div class="final-stat-item">Taux de réussite: <span class="final-stat-value" id="downSuccessRate">--%</span></div>
-            <div class="final-stat-value" id="downMinSize">-- px</div>
-        </div>
-        <button id="restartButton" onclick="restartTest()">Recommencer</button>
+        <h2>Statistiques finales</h2>
+        <div class="final-stat" id="finalStats"></div>
+        <button id="restartBtn" onclick="restartTest()">Recommencer le test</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
     <script>
-        // --- ÉLÉMENTS DOM ---
-        const video = document.getElementById('video');
-        const letterEl = document.getElementById('letterDisplay');
-        const ui = document.getElementById('ui');
-        const keyboard = document.getElementById('keyboard');
-        const leftControls = document.getElementById('leftControls');
-        const rightControls = document.getElementById('rightControls');
-        const finalStatsOverlay = document.getElementById('finalStatsOverlay');
-        const scoreTopPanel = document.getElementById('scoreTopPanel');
-        const startOverlay = document.getElementById('startOverlay');
-        const startMessage = document.getElementById('startMessage');
-        const letterSizeControl = document.getElementById('letterSizeControl');
-        const letterSizeValue = document.getElementById('letterSizeValue');
-        const letterSizeInput = document.getElementById('letterSizeInput');
-
-        // --- VARIABLES GLOBALES ---
+        // === VARIABLES GLOBALES ===
         let model;
+        let video = document.getElementById('video');
+        let letterEl = document.getElementById('letterDisplay');
+        let ui = document.getElementById('ui');
+        let startOverlay = document.getElementById('startOverlay');
+        let startMessage = document.getElementById('startMessage');
+        let letterSizeControl = document.getElementById('letterSizeControl');
+        let keyboard = document.getElementById('keyboard');
+        let leftControls = document.getElementById('leftControls');
+        let rightControls = document.getElementById('rightControls');
+        let finalStatsOverlay = document.getElementById('finalStatsOverlay');
+        let scoreTopPanel = document.getElementById('scoreTopPanel');
+        let speedBar = document.getElementById('speedBar');
+        let calibPanel = document.getElementById('calibPanel');
+        let calibSlider = document.getElementById('calibSlider');
+        let calibValue = document.getElementById('calibValue');
+        let letterSizeValue = document.getElementById('letterSizeValue');
+
+        // === PARAMÈTRES RESPECTANT VOS CONDITIONS ===
+        const MIN_ANGULAR_SPEED = 150; // 150°/sec (seuil de déclenchement)
+        const FLASH_DURATION = 60;     // 60ms (temps d'apparition de la lettre)
+        const COOLDOWN_DURATION = 300; // ms (temps minimal entre deux lettres)
+        const K_FACTOR = 2800;         // Facteur de calibration pour la distance
+
+        // === AUTRES VARIABLES ===
         let calibrationFactor = 1.0;
-        let distance = 60;
-        let rawDistance = 60;
+        let distance = 60; // cm (distance estimée utilisateur-caméra)
         let letterSizePx = 80;
         let totalLetters = 0;
         let correctLetters = 0;
         let lastHeadPos = null;
         let lastTime = performance.now();
-        let currentSpeed = 0;
+        let currentSpeedPxPerFrame = 0;
         let lastMovementDirection = null;
         let lastFlashTime = 0;
         let flashTimeout = null;
@@ -447,56 +321,46 @@
 
         let currentDirection = 'right';
         let correctCount = 0;
-
-        // Liste des lettres
         const letters = "D F P V A N L C O E R U S Z H".split(" ");
 
-        // --- INITIALISATION ---
-        function initKeyboard() {
-            keyboard.innerHTML = '';
-            const lettersSorted = [...letters].sort();
-
-            lettersSorted.forEach(letter => {
-                const key = document.createElement('button');
-                key.className = 'key';
-                key.textContent = letter;
-                key.onclick = () => validateLetter(letter);
-                keyboard.appendChild(key);
-            });
+        // === FONCTIONS DE CONVERSION ===
+        function pixelsToDegrees(pixelsMoved, distanceCm) {
+            // 10 pixels ≈ 1 cm sur le visage
+            // 57 cm = distance à laquelle 1 cm ≈ 1°
+            return (pixelsMoved / 10) * (57 / distanceCm);
         }
 
-        // --- DÉTECTION DE DIRECTION ---
+        function calculateAngularSpeed(pixelsPerFrame, distanceCm) {
+            const fps = 30; // Supposons 30 FPS
+            const pixelsPerSecond = pixelsPerFrame * fps;
+            return pixelsToDegrees(pixelsPerSecond, distanceCm);
+        }
+
+        // === DÉTECTION DE DIRECTION ===
         function detectDirection(currentPos, lastPos) {
             if (!lastPos) return;
-
             const dx = currentPos[0] - lastPos.x;
             const dy = currentPos[1] - lastPos.y;
+            const threshold = 5;
 
-            const threshold = 10;
-
-            if (Math.abs(dx) > threshold || Math.abs(dy) > threshold) {
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    lastMovementDirection = dx > 0 ? 'right' : 'left';
-                } else {
-                    lastMovementDirection = dy > 0 ? 'down' : 'up';
-                }
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > threshold) lastMovementDirection = 'right';
+                else if (dx < -threshold) lastMovementDirection = 'left';
+            } else {
+                if (dy > threshold) lastMovementDirection = 'down';
+                else if (dy < -threshold) lastMovementDirection = 'up';
             }
         }
 
-        // --- VALIDATION D'UNE LETTRE ---
+        // === VALIDATION D'UNE LETTRE ===
         function validateLetter(letter) {
             if (state !== 'WAITING_VALIDATION') return;
-
-            if (flashTimeout) {
-                clearTimeout(flashTimeout);
-                flashTimeout = null;
-            }
+            if (flashTimeout) { clearTimeout(flashTimeout); flashTimeout = null; }
 
             const keys = document.querySelectorAll('.key');
             keys.forEach(k => k.classList.remove('validated', 'invalid'));
 
             const clickedKey = Array.from(keys).find(k => k.textContent === letter);
-
             if (clickedKey) {
                 totalLetters++;
                 if (letter === currentDisplayedLetter) {
@@ -504,171 +368,114 @@
                     movements[currentDirection].correct++;
                     clickedKey.classList.add('validated');
                     letterEl.style.opacity = '0';
-
-                    // Mettre à jour la taille minimale pour la direction actuelle
                     if (letterSizePx < movements[currentDirection].minSize) {
                         movements[currentDirection].minSize = letterSizePx;
-                        updateFinalStats();
                     }
-
                 } else {
                     clickedKey.classList.add('invalid');
                     letterSizePx = Math.min(300, letterSizePx + 5);
                 }
-
                 updateScore();
                 updateLetterDisplay();
-                updateStats();
-
-                // Passer à la direction suivante après 3 bonnes réponses
                 if (++correctCount >= 3) {
                     correctCount = 0;
                     if (currentDirection === 'right') currentDirection = 'left';
                     else if (currentDirection === 'left') currentDirection = 'down';
                     else if (currentDirection === 'down') currentDirection = 'up';
-                    else if (currentDirection === 'up') {
-                        showFinalStats();
-                        return;
-                    }
+                    else if (currentDirection === 'up') { showFinalStats(); return; }
                     updateScore();
                 }
-
                 state = 'IDLE';
             }
         }
 
-        // --- METTRE À JOUR L'AFFICHAGE DES LETTRES ---
+        // === METTRE À JOUR L'AFFICHAGE ===
         function updateLetterDisplay() {
             letterEl.style.fontSize = `${letterSizePx}px`;
             letterEl.style.opacity = '0';
+            letterSizeValue.textContent = letterSizePx;
         }
 
-        // --- AJUSTER LA TAILLE DES LETTRES ---
+        // === AJUSTER LA TAILLE DES LETTRES ===
         function adjustLetterSize(change) {
             letterSizePx = Math.max(10, Math.min(300, letterSizePx + change));
-            letterSizeValue.textContent = letterSizePx;
-            letterSizeInput.value = letterSizePx;
             updateLetterDisplay();
         }
 
-        function updateLetterSizeFromInput() {
-            const newSize = parseInt(letterSizeInput.value);
-            if (!isNaN(newSize)) {
-                letterSizePx = Math.max(10, Math.min(300, newSize));
-                letterSizeValue.textContent = letterSizePx;
-                updateLetterDisplay();
-            }
-        }
-
-        // --- METTRE À JOUR LE SCORE ---
+        // === METTRE À JOUR LE SCORE ===
         function updateScore() {
             const score = totalLetters > 0 ? Math.round((correctLetters / totalLetters) * 100) : 0;
             scoreTopPanel.innerHTML = `Direction: ${currentDirection} | Score: ${score}% | Min: ${movements[currentDirection].minSize !== Infinity ? movements[currentDirection].minSize + ' px' : '-- px'}`;
         }
 
-        // --- METTRE À JOUR LES STATISTIQUES ---
-        function updateStats() {
-            const distCm = Math.round(distance);
-            document.getElementById('statusDist').textContent = `Distance: ${distCm} cm`;
-            document.getElementById('statusSize').textContent = `Taille: ${letterSizePx} px`;
-            document.getElementById('statusSpeed').textContent = `Vitesse: ${Math.round(currentSpeed)} px/s`;
-
-            // Mise à jour de la barre de vitesse
-            const speedPct = Math.min(100, (currentSpeed / 250) * 100);
-            document.getElementById('speedBar').style.width = `${speedPct}%`;
-            const bar = document.getElementById('speedBar');
-            if(currentSpeed > 150) bar.style.background = '#f00';
-            else bar.style.background = 'linear-gradient(90deg, #0f0, #ff0, #f00)';
-        }
-
-        // --- METTRE À JOUR LES STATISTIQUES FINALES ---
-        function updateFinalStats() {
-            document.getElementById('totalLetters').textContent = totalLetters;
-            document.getElementById('correctLetters').textContent = correctLetters;
-            const globalSuccessRate = totalLetters > 0 ? Math.round((correctLetters / totalLetters) * 100) : 0;
-            document.getElementById('globalSuccessRate').textContent = `${globalSuccessRate}%`;
-
-            // Droite
-            document.getElementById('rightCount').textContent = movements.right.count;
-            document.getElementById('rightSuccessRate').textContent = movements.right.count > 0 ?
-                `${Math.round((movements.right.correct / movements.right.count) * 100)}%` : '--%';
-            document.getElementById('rightMinSize').textContent = movements.right.minSize !== Infinity ?
-                `${movements.right.minSize} px` : '-- px';
-
-            // Gauche
-            document.getElementById('leftCount').textContent = movements.left.count;
-            document.getElementById('leftSuccessRate').textContent = movements.left.count > 0 ?
-                `${Math.round((movements.left.correct / movements.left.count) * 100)}%` : '--%';
-            document.getElementById('leftMinSize').textContent = movements.left.minSize !== Infinity ?
-                `${movements.left.minSize} px` : '-- px';
-
-            // Haut
-            document.getElementById('upCount').textContent = movements.up.count;
-            document.getElementById('upSuccessRate').textContent = movements.up.count > 0 ?
-                `${Math.round((movements.up.correct / movements.up.count) * 100)}%` : '--%';
-            document.getElementById('upMinSize').textContent = movements.up.minSize !== Infinity ?
-                `${movements.up.minSize} px` : '-- px';
-
-            // Bas
-            document.getElementById('downCount').textContent = movements.down.count;
-            document.getElementById('downSuccessRate').textContent = movements.down.count > 0 ?
-                `${Math.round((movements.down.correct / movements.down.count) * 100)}%` : '--%';
-            document.getElementById('downMinSize').textContent = movements.down.minSize !== Infinity ?
-                `${movements.down.minSize} px` : '-- px';
-        }
-
-        // --- CALIBRATION ---
+        // === CALIBRATION ===
         function toggleCalib() {
-            const panel = document.getElementById('calibPanel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            calibPanel.style.display = calibPanel.style.display === 'none' ? 'block' : 'none';
         }
+
         function updateCalib() {
-            calibrationFactor = parseFloat(document.getElementById('calibSlider').value);
-            document.getElementById('calibBar').style.transform = `scaleX(${calibrationFactor})`;
+            distance = parseInt(calibSlider.value);
+            calibValue.textContent = distance;
         }
+
         function saveCalib() {
-            localStorage.setItem('avd_blazeface_calib_v3', calibrationFactor);
-            document.getElementById('calibPanel').style.display = 'none';
-            updateStats();
+            localStorage.setItem('avTestDistance', distance);
+            calibPanel.style.display = 'none';
         }
+
         function loadCalib() {
-            const saved = localStorage.getItem('avd_blazeface_calib_v3');
+            const saved = localStorage.getItem('avTestDistance');
             if (saved) {
-                calibrationFactor = parseFloat(saved);
-                document.getElementById('calibSlider').value = calibrationFactor;
-                updateCalib();
+                distance = parseInt(saved);
+                calibSlider.value = distance;
+                calibValue.textContent = distance;
             }
         }
 
-        // --- AFFICHER LES STATS FINALES ---
+        // === AFFICHER LES STATS FINALES ===
         function showFinalStats() {
-            updateFinalStats();
             finalStatsOverlay.style.display = 'flex';
+            updateFinalStats();
         }
 
-        // --- RECOMMENCER LE TEST ---
+        function updateFinalStats() {
+            const stats = Object.keys(movements).map(dir => {
+                const m = movements[dir];
+                const total = m.count;
+                const correct = m.correct;
+                const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+                return `${dir.toUpperCase()}: ${correct}/${total} (${accuracy}%) - Min: ${m.minSize !== Infinity ? m.minSize + 'px' : '--'}`;
+            }).join('\n');
+            document.getElementById('finalStats').textContent = stats;
+        }
+
+        // === RECOMMENCER LE TEST ===
         function restartTest() {
             totalLetters = 0;
             correctLetters = 0;
             correctCount = 0;
             currentDirection = 'right';
+            letterSizePx = 80;
             movements = {
                 right: { count: 0, correct: 0, minSize: Infinity },
                 left: { count: 0, correct: 0, minSize: Infinity },
                 up: { count: 0, correct: 0, minSize: Infinity },
                 down: { count: 0, correct: 0, minSize: Infinity }
             };
-            letterSizePx = 80;
-            distance = 60;
-            state = 'IDLE';
-
             updateScore();
-            updateLetterDisplay();
             finalStatsOverlay.style.display = 'none';
-            updateStats();
+            state = 'IDLE';
         }
 
-        // --- DÉMARRAGE DE L'APPLICATION ---
+        // === INITIALISATION DU CLAVIER ===
+        function initKeyboard() {
+            const keys = document.querySelectorAll('.key');
+            keys.forEach(key => key.addEventListener('click', () => {
+                validateLetter(key.textContent);
+            }));
+        }
+
+        // === DÉMARRAGE DE L'APPLICATION ===
         async function startApp() {
             loadCalib();
             initKeyboard();
@@ -689,20 +496,14 @@
                     model = await blazeface.load();
                     document.getElementById('statusInit').innerText = "IA prête";
                     startMessage.style.opacity = '1';
-
-                    setTimeout(() => {
-                        startMessage.style.opacity = '0';
-                    }, 1000);
-
-                    updateLetterDisplay();
-                    loop();
+                    setTimeout(() => startMessage.style.opacity = '0', 1000);
                 };
             } catch (err) {
-                document.getElementById('errorMsg').innerText = "Erreur Caméra : " + err.message;
+                document.getElementById('errorMsg').textContent = "Erreur Caméra : " + err.message;
             }
         }
 
-        // --- BOUCLE PRINCIPALE ---
+        // === BOUCLE PRINCIPALE (RESPECT DES CONDITIONS) ===
         async function loop() {
             if (!model) return;
 
@@ -713,50 +514,47 @@
                 const face = predictions[0];
                 const currentPos = face.landmarks[2]; // Nez
 
-                // Calcul de la vitesse
+                // Calcul de la vitesse linéaire (pixels/frame)
                 const deltaTime = now - lastTime;
                 lastTime = now;
 
-                if (lastHeadPos && distance > 0) {
+                if (lastHeadPos) {
                     const dx = currentPos[0] - lastHeadPos.x;
                     const dy = currentPos[1] - lastHeadPos.y;
                     const distanceMoved = Math.sqrt(dx*dx + dy*dy);
-                    currentSpeed = (distanceMoved / deltaTime) * 1000; // pixels/seconde
+                    currentSpeedPxPerFrame = distanceMoved;
                 } else {
-                    currentSpeed = 0;
+                    currentSpeedPxPerFrame = 0;
                 }
 
                 lastHeadPos = { x: currentPos[0], y: currentPos[1] };
 
                 // Détection de la direction
-                if (lastHeadPos) {
-                    detectDirection(currentPos, lastHeadPos);
-                }
+                detectDirection(currentPos, lastHeadPos);
 
-                // 1. DISTANCE (calculée à partir de la distance inter-yeux)
+                // Calcul de la vitesse angulaire (°/sec)
+                const angularSpeed = calculateAngularSpeed(currentSpeedPxPerFrame, distance);
+
+                // Mise à jour de la distance (calibration automatique)
                 const leftEye = face.landmarks[0];
                 const rightEye = face.landmarks[1];
                 const distInterYeuxPx = Math.sqrt(
                     Math.pow(rightEye[0] - leftEye[0], 2) +
                     Math.pow(rightEye[1] - leftEye[1], 2)
                 );
-                const K_FACTOR = 2800;
                 if (distInterYeuxPx > 5) {
                     let calculatedDist = K_FACTOR / distInterYeuxPx;
-                    rawDistance = calculatedDist;
-                    distance = (distance * 0.9) + (rawDistance * 0.1);
+                    distance = (distance * 0.9) + (calculatedDist * 0.1);
                     distance = Math.max(30, Math.min(120, distance));
                 }
 
-                // Mise à jour de l'affichage
-                updateStats();
+                // Affichage de la vitesse dans l'UI
+                speedBar.style.width = `${Math.min(100, angularSpeed / 3)}%`;
+                document.querySelector('#ui .stat:nth-child(3)').textContent = `Vitesse: ${Math.round(angularSpeed)}°/s`;
+                document.querySelector('#ui .stat:nth-child(4)').textContent = `Distance: ${Math.round(distance)} cm`;
 
-                // --- DÉCLENCHEMENT DES LETTRES ---
-                const minSpeedTrigger = 50;
-                const cooldownDuration = 500;
-                const flashDuration = 2000;
-
-                if (state === 'IDLE' && currentSpeed > minSpeedTrigger && (now - lastFlashTime > cooldownDuration)) {
+                // DÉCLENCHEMENT DES LETTRES AVEC LES CONDITIONS RESPECTÉES
+                if (state === 'IDLE' && angularSpeed >= MIN_ANGULAR_SPEED && (now - lastFlashTime > COOLDOWN_DURATION)) {
                     if (lastMovementDirection === currentDirection) {
                         state = 'WAITING_VALIDATION';
                         lastFlashTime = now;
@@ -764,7 +562,6 @@
                         letterEl.textContent = currentDisplayedLetter;
                         letterEl.style.opacity = '1';
 
-                        // Incrémenter le compteur de mouvements
                         if (lastMovementDirection && movements[lastMovementDirection]) {
                             movements[lastMovementDirection].count++;
                         }
@@ -774,13 +571,19 @@
                             if (state === 'WAITING_VALIDATION') {
                                 letterEl.style.opacity = '0';
                             }
-                        }, flashDuration);
+                        }, FLASH_DURATION); // 60ms ici !
                     }
                 }
             }
-
             requestAnimationFrame(loop);
         }
+
+        // === INITIALISATION ===
+        window.onload = () => {
+            document.getElementById('startBtn').addEventListener('click', startApp);
+            calibSlider.addEventListener('input', updateCalib);
+            document.getElementById('saveCalibBtn').addEventListener('click', saveCalib);
+        };
     </script>
 </body>
 </html>
